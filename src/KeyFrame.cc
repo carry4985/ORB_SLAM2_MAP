@@ -22,6 +22,7 @@
 #include "Converter.h"
 #include "ORBmatcher.h"
 #include<mutex>
+#include <boost/make_shared.hpp>
 
 namespace ORB_SLAM2
 {
@@ -57,7 +58,7 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB):
 }
 
 // 传递 深度图和彩色图
-KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB, cv::Mat rgb, cv::Mat depth):
+KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB, cv::Mat& rgb, cv::Mat& depth):
 mnFrameId(F.mnId),  mTimeStamp(F.mTimeStamp), mnGridCols(FRAME_GRID_COLS), mnGridRows(FRAME_GRID_ROWS),
 mfGridElementWidthInv(F.mfGridElementWidthInv), mfGridElementHeightInv(F.mfGridElementHeightInv),
 mnTrackReferenceForFrame(0), mnFuseTargetForKF(0), mnBALocalForKF(0), mnBAFixedForKF(0),
@@ -87,6 +88,10 @@ mbToBeErased(false), mbBad(false), mHalfBaseline(F.mb/2), mpMap(pMap)
     }
 
     SetPose(F.mTcw);    
+
+    // convert to pointcloud
+    keyFramePointCloud = boost::make_shared<pcl::PointCloud<pcl::PointXYZRGBA>>();
+    // convertToPointCloud();
 }
 
 void KeyFrame::ComputeBoW()
@@ -693,6 +698,31 @@ float KeyFrame::ComputeSceneMedianDepth(const int q)
     sort(vDepths.begin(),vDepths.end());
 
     return vDepths[(vDepths.size()-1)/q];
+}
+
+void KeyFrame::convertToPointCloud(void)
+{
+    for (int m=0; m<mImDep.rows; m+=3)
+    {
+        for ( int n=0; n<mImDep.cols; n+=3)
+        {
+            float d = mImDep.ptr<float>(m)[n];
+            if (d < 0.01 || d>10)
+                continue;
+            pcl::PointXYZRGBA p;
+            p.z = d;
+            p.x = (n - cx) * p.z / fx;
+            p.y = (m - cy) * p.z / fy;
+            
+            p.b = mImRGB.ptr<uchar>(m)[n*3];
+            p.g = mImRGB.ptr<uchar>(m)[n*3+1];
+            p.r = mImRGB.ptr<uchar>(m)[n*3+2];
+                
+            keyFramePointCloud->points.push_back(p);
+        }
+    }
+
+    keyFramePointCloud->is_dense = false;
 }
 
 } //namespace ORB_SLAM

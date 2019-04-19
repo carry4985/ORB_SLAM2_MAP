@@ -97,6 +97,7 @@ void Viewer::Run()
     pangolin::Var<bool> menuShowGraph("menu.Show Graph",true,true);
     pangolin::Var<bool> menuLocalizationMode("menu.Localization Mode",false,true);
     pangolin::Var<bool> menuReset("menu.Reset",false,false);
+    pangolin::Var<bool> menuSave("menu.Save", false, false);// 保存地图按钮==变量===
 
     // Define Camera Render Object (for view / scene browsing)
     pangolin::OpenGlRenderState s_cam(
@@ -162,6 +163,9 @@ void Viewer::Run()
         // 在xyz平面上显示网格
         // mpMapDrawer->DrawGrid();
         mpMapDrawer->DrawCurrentCamera(Twc);  // 画当前相机
+        // show BA, and the trajectory
+        if(menuShowKeyFrames || menuShowGraph)
+            mpMapDrawer->DrawKeyFrames(menuShowKeyFrames, menuShowGraph);
 
         //========== 显示 ORB-SLAM2 地图点 / 稠密octo-map点 ========================
         if(menuShowPoints)
@@ -205,13 +209,13 @@ void Viewer::Run()
             menuReset = false;
         }
 
-        // if(menuSave) // 保存 地图==============
-        // {
-        //    mpSystem->SaveMap("map.bin"); // orb-slam2 保存系统地图，便于重启后载入地图，重定位
-        //    mpMapDrawer->SaveOctoMap("octomap.ot");// 保存octomap地图
-        //    menuSave = false;
-        //    cout<<"save done!"<<endl;
-        // }
+        if(menuSave) // 保存 地图==============
+        {
+            mpSystem->SaveMap("featurePointMap.bin"); // orb-slam2 保存系统地图，便于重启后载入地图，重定位
+            mpMapDrawer->SaveOctoMap("octoMap.ot");// 保存octomap地图
+            menuSave = false;
+            cout<<"save done!"<<endl;
+        }
 
         if(Stop())
         {

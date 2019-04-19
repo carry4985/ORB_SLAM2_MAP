@@ -36,9 +36,9 @@
 #include "KeyFrameDatabase.h"
 #include "ORBVocabulary.h"
 #include "Viewer.h"
-#include "pointcloudmapping.h"
+#include "PointCloudMap.h"
 
-class PointCloudMapping; 
+
 
 namespace ORB_SLAM2
 {
@@ -49,6 +49,8 @@ class Map;
 class Tracking;
 class LocalMapping;
 class LoopClosing;
+class PointCloudMapping; 
+
 class System
 {
 public:
@@ -60,8 +62,6 @@ public:
     };
 
 public:
-
-    bool has_suffix(const std::string& filename, const std::string& suffix);
 
     // Initialize the SLAM system. It launches the Local Mapping, Loop Closing and Viewer threads.
     System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor, const bool bUseViewer = true);
@@ -118,7 +118,11 @@ public:
     std::vector<MapPoint*> GetTrackedMapPoints();     // 当前帧 地图点
     std::vector<cv::KeyPoint> GetTrackedKeyPointsUn();// 当前帧 关键点
 
-    // bool SaveMap(const string &filename);
+    // if find the string, return true
+    bool has_suffix(const std::string& filename, const std::string& suffix);
+    // save the octoMap and point cloud map
+    bool SaveMap(const string &filename);
+	
 private:
 
     // Input sensor

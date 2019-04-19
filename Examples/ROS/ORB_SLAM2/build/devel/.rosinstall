@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/robot/Desktop/Project_CPP/ORB_SLAM2_Map/Examples/ROS/ORB_SLAM2/build/devel/setup.sh

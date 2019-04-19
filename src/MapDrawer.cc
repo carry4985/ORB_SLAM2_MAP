@@ -100,6 +100,7 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph)
 
     const vector<KeyFrame*> vpKFs = mpMap->GetAllKeyFrames();
 
+    // draw keyframe pose  trajectory
     if(bDrawKF)
     {
         for(size_t i=0; i<vpKFs.size(); i++)
@@ -140,6 +141,7 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph)
         }
     }
 
+    // draw BA pose graph
     if(bDrawGraph)
     {
         glLineWidth(mGraphLineWidth);
@@ -526,24 +528,26 @@ void MapDrawer::GeneratePointCloud(KeyFrame *kf,
                                    pcl::PointCloud<pcl::PointXYZRGB> &ground, 
                                    pcl::PointCloud<pcl::PointXYZRGB> &nonground)
 {
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+    float max_depth = 6.0;
     for ( int m=0; m<(kf->mImDep.rows); m+=1 )// 每一行
     {
         for ( int n=0; n<(kf->mImDep.cols); n+=1 )//每一列
         {
             float d = kf->mImDep.ptr<float>(m)[n];// 深度 m为单位 保留0～2m内的点
             //if (d < 0.01 || d>2.0) // 相机测量范围 0.5～6m
-            if (d < 0.50 || d>3.0) // 相机测量范围 0.5～6m
-            continue;
+            if (d < 0.50 || d > 0.8 * max_depth) // 相机测量范围 0.5～6m
+            	continue;
             pcl::PointXYZRGB p;
             p.z = d;
-            p.x = ( n - kf->cx) * p.z / kf->fx;
-            p.y = ( m - kf->cy) * p.z / kf->fy;
-            if(p.y<-3.0 || p.y>3.0) continue;// 保留 垂直方向 -3～3m范围内的点 
+            p.x = (n - kf->cx) * p.z / kf->fx;
+            p.y = (m - kf->cy) * p.z / kf->fy;
+            if(p.y < -max_depth || p.y > max_depth) 
+            	continue;// 只保留 垂直方向 -3～3m范围内的点 
             p.b = kf->mImRGB.ptr<uchar>(m)[n*3+0];// 点颜色=====
             p.g = kf->mImRGB.ptr<uchar>(m)[n*3+1];
             p.r = kf->mImRGB.ptr<uchar>(m)[n*3+2];
-            cloud->points.push_back( p );
+            cloud->points.push_back(p);
 
         }
     }
@@ -554,9 +558,9 @@ void MapDrawer::GeneratePointCloud(KeyFrame *kf,
     vg.filter(*cloud);
 
     // 转换到世界坐标下====
-    Eigen::Isometry3d T = ORB_SLAM2::Converter::toSE3Quat( kf->GetPose() );
+    Eigen::Isometry3d T = ORB_SLAM2::Converter::toSE3Quat(kf->GetPose());
     pcl::PointCloud<pcl::PointXYZRGB> temp;
-    pcl::transformPointCloud( *cloud, temp, T.inverse().matrix());
+    pcl::transformPointCloud(*cloud, temp, T.inverse().matrix());
 
     // 过滤 掉地面======
     if(temp.size()<50)
@@ -598,13 +602,13 @@ void MapDrawer::GeneratePointCloud(KeyFrame *kf,
             if (std::abs(coefficients->values.at(3)) >0.07)// 系数什么含义??
             {
 
-                printf("Ground plane found: %zu/%zu inliers. Coeff: %f %f %f %f \n", 
-                inliers->indices.size(),
-                cloud_filtered.size(),
-                coefficients->values.at(0),
-                coefficients->values.at(1),
-                coefficients->values.at(2),
-                coefficients->values.at(3));
+                // printf("Ground plane found: %zu/%zu inliers. Coeff: %f %f %f %f \n", 
+                // inliers->indices.size(),
+                // cloud_filtered.size(),
+                // coefficients->values.at(0),
+                // coefficients->values.at(1),
+                // coefficients->values.at(2),
+                // coefficients->values.at(3));
 
                 extract.setNegative (false);
                 extract.filter (ground); // 提取 平面上的点 地面点============
@@ -623,13 +627,13 @@ void MapDrawer::GeneratePointCloud(KeyFrame *kf,
             }
             else
             {
-             printf("Horizontal plane (not ground) found: %zu/%zu inliers. Coeff: %f %f %f %f \n",     
-                     inliers->indices.size(),
-                     cloud_filtered.size(),
-                     coefficients->values.at(0),
-                     coefficients->values.at(1),
-                     coefficients->values.at(2),
-                     coefficients->values.at(3));
+                // printf("Horizontal plane (not ground) found: %zu/%zu inliers. Coeff: %f %f %f %f \n",     
+                // inliers->indices.size(),
+                // cloud_filtered.size(),
+                // coefficients->values.at(0),
+                // coefficients->values.at(1),
+                // coefficients->values.at(2),
+                // coefficients->values.at(3));
 
                 pcl::PointCloud<pcl::PointXYZRGB> cloud_out;
                 extract.setNegative (false);
@@ -672,9 +676,6 @@ void MapDrawer::UpdateOctomap(vector<KeyFrame*> vKFs)
 
             pcl::PointCloud<pcl::PointXYZRGB>  ground; // 地面点云
             pcl::PointCloud<pcl::PointXYZRGB>  nonground;// 无地面点云
-
-            // 使用 2d目标检测结果 和点云 获取3d目标信息====
-            // 使用另一个线程 对关键帧进行 2d目标检测
             GeneratePointCloud(vKFs[i], ground, nonground);// 生成点云
 
             octomap::point3d sensorOrigin = 
@@ -701,15 +702,15 @@ void MapDrawer::InsertScan(octomap::point3d sensorOrigin,  // 点云原点
 
     octomap::KeySet free_cells, occupied_cells;// 空闲格子，占有格子
 
-    // 每一个 地面 点云=======================
+    // 每一个 地面 点云
     for(auto p:ground.points)
     {
         octomap::point3d point(p.x, p.y, p.z);
         // only clear space (ground points)
         if(m_octree->computeRayKeys(sensorOrigin, point, m_keyRay))
         {
-            free_cells.insert(m_keyRay.begin(), m_keyRay.end()); // 地面为空闲格子======
-            m_octree->averageNodeColor(p.x, p.y, p.z, p.r,p.g, p.b);//颜色
+            free_cells.insert(m_keyRay.begin(), m_keyRay.end()); // 地面为空闲格子
+            m_octree->averageNodeColor(p.x, p.y, p.z, p.r,p.g, p.b);// 颜色
         }
         octomap::OcTreeKey endKey;
         if(m_octree->coordToKeyChecked(point, endKey))

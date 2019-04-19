@@ -38,10 +38,10 @@
 #include "MapDrawer.h"
 #include "System.h"
 
-#include "pointcloudmapping.h"
+#include "PointCloudMap.h"
 #include <mutex>
 
-class PointCloudMapping;
+
 
 namespace ORB_SLAM2
 {
@@ -52,6 +52,7 @@ class Map;
 class LocalMapping;
 class LoopClosing;
 class System;
+class PointCloudMapping;
 
 class Tracking
 {  
@@ -76,7 +77,6 @@ public:
 
     // Use this function if you have deactivated local mapping and you only want to localize the camera.
     void InformOnlyTracking(const bool &flag);
-
 
 public:
 

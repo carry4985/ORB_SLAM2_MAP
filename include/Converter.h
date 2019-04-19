@@ -49,9 +49,9 @@ public:
     static Eigen::Matrix<double,3,1> toVector3d(const cv::Point3f &cvPoint);
     static Eigen::Matrix<double,3,3> toMatrix3d(const cv::Mat &cvMat3);
 
-    // 转四元素==========
+    // 转四元素
     static std::vector<float>  toQuaternion(const cv::Mat &M);
-    // 载入地图时会用到=====
+    // 载入地图时会用到
     void RmatOfQuat(cv::Mat &M, const cv::Mat &q);
 };
 

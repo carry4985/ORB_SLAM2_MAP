@@ -30,38 +30,41 @@
 #include "KeyFrameDatabase.h"
 
 #include <mutex>
+#include <pcl/common/transforms.h>
+#include <pcl/point_types.h>
 
 
 namespace ORB_SLAM2
 {
 
-class Map;
-class MapPoint;
-class Frame;
-class KeyFrameDatabase;
+class Map;       // 地图
+class MapPoint;  // 地图点
+class Frame;     // 普通帧
+class KeyFrameDatabase; // 关键帧数据库 存储关键点 位姿态等信息 用于匹配
 
 class KeyFrame
 {
 public:
     KeyFrame(Frame &F, Map* pMap, KeyFrameDatabase* pKFDB);
     KeyFrame(Frame &F, Map* pMap, KeyFrameDatabase* pKFDB,
-            cv::Mat rgb, cv::Mat depth);
+            cv::Mat& rgb, cv::Mat& depth);
     // Pose functions
     void SetPose(const cv::Mat &Tcw);
-    cv::Mat GetPose();
-    cv::Mat GetPoseInverse();
-    cv::Mat GetCameraCenter();
-    cv::Mat GetStereoCenter();
-    cv::Mat GetRotation();
-    cv::Mat GetTranslation();
+    cv::Mat GetPose();// 位姿
+    cv::Mat GetPoseInverse();// 位姿
+    cv::Mat GetCameraCenter();// 单目 相机中心
+    cv::Mat GetStereoCenter();// 双目 相机中心
+    cv::Mat GetRotation();// 旋转矩阵
+    cv::Mat GetTranslation();// 平移向量
 
     // Bag of Words Representation
     void ComputeBoW();
 
     // Covisibility graph functions
+    // 可视化 添加 线连接  关键点连线
     void AddConnection(KeyFrame* pKF, const int &weight);
-    void EraseConnection(KeyFrame* pKF);
-    void UpdateConnections();
+    void EraseConnection(KeyFrame* pKF);// 删除 线连接
+    void UpdateConnections();// 跟新线连接
     void UpdateBestCovisibles();
     std::set<KeyFrame *> GetConnectedKeyFrames();
     std::vector<KeyFrame* > GetVectorCovisibleKeyFrames();
@@ -69,27 +72,28 @@ public:
     std::vector<KeyFrame*> GetCovisiblesByWeight(const int &w);
     int GetWeight(KeyFrame* pKF);
 
-    // Spanning tree functions
-    void AddChild(KeyFrame* pKF);
-    void EraseChild(KeyFrame* pKF);
-    void ChangeParent(KeyFrame* pKF);
-    std::set<KeyFrame*> GetChilds();
-    KeyFrame* GetParent();
-    bool hasChild(KeyFrame* pKF);
+    // Spanning tree functions 生成 关键帧 树 
+    void AddChild(KeyFrame* pKF);// 添加孩子
+    void EraseChild(KeyFrame* pKF);// 删除孩子
+    void ChangeParent(KeyFrame* pKF);// 跟换父亲
+    std::set<KeyFrame*> GetChilds();// 得到孩子
+    KeyFrame* GetParent();//得到父亲
+    bool hasChild(KeyFrame* pKF);// 有孩子吗
 
     // Loop Edges
-    void AddLoopEdge(KeyFrame* pKF);
-    std::set<KeyFrame*> GetLoopEdges();
+    void AddLoopEdge(KeyFrame* pKF);  // 添加闭环边
+    std::set<KeyFrame*> GetLoopEdges(); 
 
     // MapPoint observation functions
-    void AddMapPoint(MapPoint* pMP, const size_t &idx);
-    void EraseMapPointMatch(const size_t &idx);
+    // 地图点 观测函数
+    void AddMapPoint(MapPoint* pMP, const size_t &idx);// 添加 地图点
+    void EraseMapPointMatch(const size_t &idx);// 删除地图点匹配
     void EraseMapPointMatch(MapPoint* pMP);
-    void ReplaceMapPointMatch(const size_t &idx, MapPoint* pMP);
-    std::set<MapPoint*> GetMapPoints();
-    std::vector<MapPoint*> GetMapPointMatches();
-    int TrackedMapPoints(const int &minObs);
-    MapPoint* GetMapPoint(const size_t &idx);
+    void ReplaceMapPointMatch(const size_t &idx, MapPoint* pMP);// 替换地图点匹配
+    std::set<MapPoint*> GetMapPoints();// 得到地图点集合 set 指针
+    std::vector<MapPoint*> GetMapPointMatches();// 得到地图点匹配
+    int TrackedMapPoints(const int &minObs);// 跟踪到的地图点
+    MapPoint* GetMapPoint(const size_t &idx);//得到单个地图点
 
     // KeyPoint functions
     std::vector<size_t> GetFeaturesInArea(const float &x, const float  &y, const float  &r) const;
@@ -119,31 +123,36 @@ public:
 
     cv::Mat mImRGB;// 彩色图
     cv::Mat mImDep;// 深度图
-
+    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr keyFramePointCloud;
+    
+    void convertToPointCloud(void);
     // The following variables are accesed from only 1 thread or never change (no mutex needed).
 public:
 
-    static long unsigned int nNextId;
-    long unsigned int mnId;
-    const long unsigned int mnFrameId;
+    static long unsigned int nNextId;  // 上一个关键帧帧的Id
+    long unsigned int mnId;            // 当前关键帧的Id
+    const long unsigned int mnFrameId; // 图像帧的Id
 
     const double mTimeStamp;
 
     // Grid (to speed up feature matching)
-    const int mnGridCols;
-    const int mnGridRows;
-    const float mfGridElementWidthInv;
+    // 用于图像分割，加速特征匹配
+    const int mnGridCols; // 分割后图像的列数
+    const int mnGridRows; // 分割后图像的行数
+    const float mfGridElementWidthInv; // 分割后每个像素占用的格子数量
     const float mfGridElementHeightInv;
 
     // Variables used by the tracking
     long unsigned int mnTrackReferenceForFrame;
-    long unsigned int mnFuseTargetForKF;
+    long unsigned int mnFuseTargetForKF; // 做过相邻匹配 标志 在 LocalMapping::SearchInNeighbors() 使用
 
     // Variables used by the local mapping
+    // 本地地图  最小化重投影误差 BA参数
     long unsigned int mnBALocalForKF;
     long unsigned int mnBAFixedForKF;
 
     // Variables used by the keyframe database
+    // 关键帧数据库 变量参数
     long unsigned int mnLoopQuery;
     int mnLoopWords;
     float mLoopScore;
@@ -157,9 +166,11 @@ public:
     long unsigned int mnBAGlobalForKF;
 
     // Calibration parameters
+    // 校准参数 相机内参 基线*焦距 基线 深度
     const float fx, fy, cx, cy, invfx, invfy, mbf, mb, mThDepth;
 
     // Number of KeyPoints
+    // 当前关键帧 提取到体征点的数量
     const int N;
 
     // KeyPoints, stereo coordinate and descriptors (all associated by an index)
@@ -196,14 +207,14 @@ public:
 protected:
 
     // SE3 Pose and camera center
-    cv::Mat Tcw;
-    cv::Mat Twc;
-    cv::Mat Ow;
+    cv::Mat Tcw;// 世界 到 相机
+    cv::Mat Twc;// 相机 到 世界
+    cv::Mat Ow;//  相机坐标
 
     cv::Mat Cw; // Stereo middel point. Only for visualization
 
     // MapPoints associated to keypoints
-    std::vector<MapPoint*> mvpMapPoints;
+    std::vector<MapPoint*> mvpMapPoints; // 地图点
 
     // BoW
     KeyFrameDatabase* mpKeyFrameDB;

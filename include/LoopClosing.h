@@ -80,6 +80,12 @@ public:
 
     bool isFinished();
 
+    bool loop_detected;
+
+    // return the map
+    Map* getMap() {
+		return mpMap;
+	}
 protected:
 
     bool CheckNewKeyFrames();

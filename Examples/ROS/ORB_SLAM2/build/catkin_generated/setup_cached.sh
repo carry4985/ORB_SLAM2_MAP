@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+# generated from catkin/python/catkin/environment_cache.py
+
+# based on a snapshot of the environment before and after calling the setup script
+# it emulates the modifications of the setup script without recurring computations
+
+# new environment variables
+
+# modified environment variables
+export CMAKE_PREFIX_PATH="/home/robot/Desktop/Project_CPP/ORB_SLAM2_Map/Examples/ROS/ORB_SLAM2/build/devel:$CMAKE_PREFIX_PATH"
+export ROSLISP_PACKAGE_DIRECTORIES="/home/robot/Desktop/Project_CPP/ORB_SLAM2_Map/Examples/ROS/ORB_SLAM2/build/devel/share/common-lisp:$ROSLISP_PACKAGE_DIRECTORIES"
+export ROS_PACKAGE_PATH="/home/robot/Desktop/Project_CPP/ORB_SLAM2_Map/Examples/ROS/ORB_SLAM2:/home/robot/catkin_slam/src/scanmove:/home/robot/catkin_slam/src/particle_filter_localization:/home/robot/catkin_slam/src/ytlidar_ros:/home/robot/catkin_slam/src/ydlidar:/home/robot/catkin_slam/src/imu_tools/rviz_imu_plugin:/home/robot/catkin_slam/src/mpu6050_imu:/home/robot/catkin_slam/src/imu_tools/imu_tools:/home/robot/catkin_slam/src/imu_tools/imu_filter_madgwick:/home/robot/catkin_slam/src/imu_tools/imu_complementary_filter:/home/robot/catkin_slam/src/hector_slam/hector_trajectory_server:/home/robot/catkin_slam/src/hector_slam/hector_slam_launch:/home/robot/catkin_slam/src/hector_slam/hector_slam:/home/robot/catkin_slam/src/hector_slam/hector_map_server:/home/robot/catkin_slam/src/hector_slam/hector_geotiff_plugins:/home/robot/catkin_slam/src/hector_slam/hector_geotiff:/home/robot/catkin_slam/src/hector_slam/hector_nav_msgs:/home/robot/catkin_slam/src/hector_slam/hector_marker_drawing:/home/robot/catkin_slam/src/hector_slam/hector_mapping:/home/robot/catkin_slam/src/hector_slam/hector_compressed_map_transport:/home/robot/catkin_slam/src/hector_slam/hector_map_tools:/home/robot/catkin_slam/src/hector_slam/hector_imu_tools:/home/robot/catkin_slam/src/hector_slam/hector_imu_attitude_to_tf:/home/robot/catkin_slam/src/cartographer_magazino/cartographer_toru:/home/robot/catkin_slam/src/cartographer_ros/cartographer_rviz:/home/robot/catkin_slam/src/cartographer_mir/cartographer_mir:/home/robot/catkin_slam/src/cartographer_ros/cartographer_ros:/home/robot/catkin_slam/src/cartographer_ros/cartographer_ros_msgs:/opt/ros/indigo/share:/opt/ros/indigo/stacks"

@@ -104,23 +104,24 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     mpFrameDrawer = new FrameDrawer(mpMap); // 稀疏地图显示
     mpMapDrawer = new MapDrawer(mpMap, strSettingsFile); // 关键帧显示
 
-		// 稠密点云地图显示线程
-    mpPointCloudMapping = make_shared<PointCloudMapping>(resolution);
-    // Initialize the Tracking thread
-    // it will live in the main thread of execution, the one that called this constructor
-    // 5.初始化位姿跟踪线程对象 未启动
-    mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer,
-                             mpMap, mpPointCloudMapping, mpKeyFrameDatabase, strSettingsFile, mSensor);
-
     // Initialize the Local Mapping thread and launch
-    // 6. 初始化局部地图构建线程对象并启动
+    // 5. 初始化局部地图构建线程对象并启动
     mpLocalMapper = new LocalMapping(mpMap, mSensor==MONOCULAR);
     mptLocalMapping = new thread(&ORB_SLAM2::LocalMapping::Run,mpLocalMapper);
 
     // Initialize the Loop Closing thread and launch
-    // 7. 初始化闭环检测线程 并启动
+    // 6. 初始化闭环检测线程 并启动
     mpLoopCloser = new LoopClosing(mpMap, mpKeyFrameDatabase, mpVocabulary, mSensor!=MONOCULAR);
     mptLoopClosing = new thread(&ORB_SLAM2::LoopClosing::Run, mpLoopCloser);
+
+    // 稠密点云地图显示线程
+    mpPointCloudMapping = make_shared<PointCloudMapping>(resolution, mpLoopCloser);
+
+    // Initialize the Tracking thread
+    // it will live in the main thread of execution, the one that called this constructor
+    // 7.初始化位姿跟踪线程对象 未启动
+    mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer,
+                             mpMap, mpPointCloudMapping, mpKeyFrameDatabase, strSettingsFile, mSensor);
 
     // Initialize the Viewer thread and launch
     // 8.初始化位姿跟踪线程并启动
@@ -506,10 +507,10 @@ vector<cv::KeyPoint> System::GetTrackedKeyPointsUn()
     return mTrackedKeyPointsUn;
 }
 
-// // 保存地图=====
-// bool System::SaveMap(const string &filename) 
-// {
-//     cerr << "System Saving to " << filename << endl;
-//     return mpMap->Save(filename);
-// }
+// 保存地图=====
+bool System::SaveMap(const string &filename) 
+{
+    cerr << "System Saving to " << filename << endl;
+    return mpMap->Save(filename);
+}
 } //namespace ORB_SLAM

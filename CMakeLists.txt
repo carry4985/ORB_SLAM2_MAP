@@ -80,7 +80,7 @@ src/KeyFrameDatabase.cc
 src/Sim3Solver.cc
 src/Initializer.cc
 src/Viewer.cc
-src/pointcloudmapping.cc
+src/PointCloudMap.cc
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -116,23 +116,23 @@ target_link_libraries(rgbd_xtion_cc ${PROJECT_NAME})
 # Examples/Stereo/stereo_kitti.cc)
 # target_link_libraries(stereo_kitti ${PROJECT_NAME})
 
-# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/Monocular)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/Monocular)
 
 # add_executable(mono_tum
 # Examples/Monocular/mono_tum.cc)
 # target_link_libraries(mono_tum ${PROJECT_NAME})
 
-# add_executable(mono_kitti
-# Examples/Monocular/mono_kitti.cc)
-# target_link_libraries(mono_kitti ${PROJECT_NAME})
+add_executable(mono_kitti
+Examples/Monocular/mono_kitti.cc)
+target_link_libraries(mono_kitti ${PROJECT_NAME})
 
 
 ## .txt >>> .bin 文件转换
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/tools)
-add_executable(bin_vocabulary
-tools/bin_vocabulary.cc)
-target_link_libraries(bin_vocabulary ${PROJECT_NAME})
+# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/tools)
+# add_executable(bin_vocabulary
+# tools/bin_vocabulary.cc)
+# target_link_libraries(bin_vocabulary ${PROJECT_NAME})
 
-add_executable(pcd2octomap
-tools/pcd2octomap.cc)
-target_link_libraries(pcd2octomap ${PROJECT_NAME})
+# add_executable(pcd2octomap
+# tools/pcd2octomap.cc)
+# target_link_libraries(pcd2octomap ${PROJECT_NAME})

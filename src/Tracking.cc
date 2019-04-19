@@ -99,7 +99,6 @@ c 通过全局重定位来初始化位姿估计 Relocalization()
 #include "Optimizer.h"
 #include "PnPsolver.h"
 
-#include "pointcloudmapping.h"
 
 #include <iostream>
 
@@ -792,7 +791,7 @@ void Tracking::StereoInitialization()
         mCurrentFrame.SetPose(cv::Mat::eye(4,4,CV_32F));
 
         // Create KeyFrame
-        KeyFrame* pKFini = new KeyFrame(mCurrentFrame,mpMap,mpKeyFrameDB);
+        KeyFrame* pKFini = new KeyFrame(mCurrentFrame, mpMap, mpKeyFrameDB);
 
         // Insert KeyFrame in the map
         mpMap->AddKeyFrame(pKFini);
@@ -1364,11 +1363,11 @@ void Tracking::CreateNewKeyFrame()
         return;
 
     KeyFrame* pKF;
-    if(mSensor == System::RGBD) // rgbd	    
+    if(mSensor == System::RGBD) // rgbd
         pKF = new KeyFrame(mCurrentFrame, mpMap, mpKeyFrameDB,
                             this->mImRGB, this->mImDepth);
     else
-        pKF = new KeyFrame(mCurrentFrame,mpMap,mpKeyFrameDB);
+        pKF = new KeyFrame(mCurrentFrame, mpMap, mpKeyFrameDB);
 
     mpReferenceKF = pKF;
     mCurrentFrame.mpReferenceKF = pKF;
@@ -1439,7 +1438,7 @@ void Tracking::CreateNewKeyFrame()
 
     mpLocalMapper->SetNotStop(false);
     
-    mpPointCloudMapping->insertKeyFrame( pKF, this->mImRGB, this->mImDepth );
+    mpPointCloudMapping->insertKeyFrame(pKF);
 
     mnLastKeyFrameId = mCurrentFrame.mnId;
     mpLastKeyFrame = pKF;

@@ -1,4 +1,4 @@
-# RGBD_ORB_SLAM2_RT
+# ORB_SLAM2_Map
 Real-time envrionment reconstruction based on ORB_SLAM2 with XTION (RGBD sensor) <br>
  
 ### Introduction
@@ -44,9 +44,9 @@ More details: http://blog.csdn.net/aptx704610875/article/details/51490201
 
 run 
 
-	  ./Examples/RGB-D/rgbd_xtion_cc Vocabulary/ORBvoc.txt ./Examples/RGB-D/xtion.yaml
+	  ../Examples/RGB-D/rgbd_xtion_cc ../Vocabulary/ORBvoc.txt ../Examples/RGB-D/xtion.yaml
 
-	 ./Examples/RGB-D/rgbd_xtion_cc Vocabulary/ORBvoc.bin ./Examples/RGB-D/xtion.yaml
+	../Examples/RGB-D/rgbd_xtion_cc ../Vocabulary/ORBvoc.bin ../Examples/RGB-D/xtion.yaml
 
 ### Tools
 txt词袋转二进制词袋
